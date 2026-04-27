@@ -14,14 +14,21 @@ const app = express();
 const PORT = process.env.PORT || 5050;
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://react-product-management-website-9j83ft9fu.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (
+      origin === "http://localhost:5173" ||
+      origin.endsWith(".vercel.app")
+    ) {
+      return callback(null, true);
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI)
